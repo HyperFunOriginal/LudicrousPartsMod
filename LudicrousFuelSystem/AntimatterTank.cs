@@ -34,7 +34,7 @@ namespace LudicrousFuelSystem
         PartResource ah, ec;
         public override string GetInfo()
         {
-            return "\n" + Math.Round(EnergyConsumption(ah.maxAmount) / storageEfficiency * 0.25d, 2) + ConfigInfo.consumptionMessage + " " + Math.Round(storageEfficiency * 100d, 2) + "% " + ConfigInfo.maxAccMessage + " " + Math.Round(maxMagneticLevStr * 40d) + "m/s.";
+            return "\n" + Math.Round(EnergyConsumption(ah.maxAmount) / storageEfficiency * 0.25d, 2) + ConfigInfo.consumptionMessage + " " + Math.Round(storageEfficiency * 100d, 2) + "% " + ConfigInfo.maxAccMessage + " " + Math.Round(maxMagneticLevStr * 40d) + "m/s².";
         }
         public override string GetModuleDisplayName()
         {

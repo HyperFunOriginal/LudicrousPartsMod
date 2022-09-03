@@ -14,13 +14,14 @@ namespace LudicrousFuelSystem
         public double boilingPoint;
         public double volatility;
         public string liquidName;
+        public double gasPressure;
 
         [KSPField(advancedTweakable = false, guiName = "#ludiPart_0035", guiActiveEditor = false, guiActive = true, guiActiveUnfocused = false, isPersistant = false, groupDisplayName = "#ludiPart_0038", groupName = "IInfo")]
         public string liquidDisplayName;
         [KSPField(advancedTweakable = false, guiUnits = " U", guiActiveEditor = false, guiActive = true, guiActiveUnfocused = false, guiName = "#ludiPart_0037", guiFormat = "F2", isPersistant = false, groupDisplayName = "#ludiPart_0038", groupName = "IInfo")]
         public double amtOfGas;
         [KSPField(advancedTweakable = false, guiUnits = " atm", guiActiveEditor = false, guiActive = true, guiActiveUnfocused = false, guiName = "#ludiPart_0036", guiFormat = "F2", isPersistant = false, groupDisplayName = "#ludiPart_0038", groupName = "IInfo")]
-        public double gasPressure;
+        public double netPressure;
         
         double v, w, x;
         double vapPressure => Math.Exp(vaporizationCoeff - (vaporizationCoeff * boilingPoint / part.temperature));
@@ -76,7 +77,6 @@ namespace LudicrousFuelSystem
         }
         public override void OnLoad(ConfigNode node)
         {
-            part.maxPressure = ConfigInfo.instance.maxPressure;
             if (node.HasValue("liquidName"))
                 liquidName = node.GetValue("liquidName");
             if (node.HasValue("spEnthalpyOfVap"))
@@ -89,6 +89,7 @@ namespace LudicrousFuelSystem
             if (node.HasValue("amtOfGas"))
                 amtOfGas = Maths.Clamp(double.Parse(node.GetValue("amtOfGas")), 0, res.maxAmount);
             liquidDisplayName = res.info.displayName;
+            part.maxPressure = Math.Min(part.maxPressure, Math.Round(ConfigInfo.instance.maxPressure * 101.325d / volumePercentage));
             base.OnLoad(node);
         }
         public override void OnSave(ConfigNode node)
@@ -114,18 +115,18 @@ namespace LudicrousFuelSystem
             amtOfGas = Maths.Clamp(amtOfGas + delta, 0, res.maxAmount * 1.00999 - res.amount);
             res.amount = Maths.Clamp(res.amount - delta, 0d, res.maxAmount);
             part.temperature -= delta * Math.Max(0, enthalpyOfVap - vapPressure * 5d) / part.thermalMass * res.info.density * 10000d;
-            double trueGaugePressure = gasPressure - part.staticPressureAtm;
-            double calibratedPressure = trueGaugePressure * volumePercentage;
+            netPressure = gasPressure - part.staticPressureAtm;
+            double calibratedPressure = netPressure * volumePercentage;
 
             if (-calibratedPressure > ConfigInfo.instance.maxVacuum * ConfigInfo.instance.warningThreshold)
             {
-                WarningMessageDisp.SendMessage(ConfigInfo.warningUP + " " + Math.Round(trueGaugePressure, 2) + " atm", (-calibratedPressure - ConfigInfo.instance.maxVacuum * ConfigInfo.instance.warningThreshold) / (ConfigInfo.instance.maxVacuum * ConfigInfo.instance.invWarningThreshold));
+                WarningMessageDisp.SendMessage(ConfigInfo.warningUP + " " + Math.Round(netPressure, 2) + " atm", (-calibratedPressure - ConfigInfo.instance.maxVacuum * ConfigInfo.instance.warningThreshold) / (ConfigInfo.instance.maxVacuum * ConfigInfo.instance.invWarningThreshold));
 
                 if (-calibratedPressure > ConfigInfo.instance.maxVacuum)
                 {
                     if (Maths.Occurred((-calibratedPressure - ConfigInfo.instance.maxVacuum) * 0.01d))
                     {
-                        FlightLogger.fetch.LogEvent(part.partInfo.title + " " + ConfigInfo.explodeLogUP + " " + Math.Round(-trueGaugePressure - ConfigInfo.instance.maxVacuum / volumePercentage, 2) + " atm");
+                        FlightLogger.fetch.LogEvent(part.partInfo.title + " " + ConfigInfo.explodeLogUP + " " + Math.Round(-netPressure - ConfigInfo.instance.maxVacuum / volumePercentage, 2) + " atm");
                         part.explosionPotential = 0;
                         part.explode();
                     }
@@ -133,13 +134,13 @@ namespace LudicrousFuelSystem
             }
             else if (calibratedPressure > ConfigInfo.instance.maxPressure * ConfigInfo.instance.warningThreshold)
             {
-                WarningMessageDisp.SendMessage(ConfigInfo.warningOP + " " + Math.Round(trueGaugePressure, 2) + " atm", (calibratedPressure - ConfigInfo.instance.maxPressure * ConfigInfo.instance.warningThreshold) / (ConfigInfo.instance.maxPressure * ConfigInfo.instance.invWarningThreshold));
+                WarningMessageDisp.SendMessage(ConfigInfo.warningOP + " " + Math.Round(netPressure, 2) + " atm", (calibratedPressure - ConfigInfo.instance.maxPressure * ConfigInfo.instance.warningThreshold) / (ConfigInfo.instance.maxPressure * ConfigInfo.instance.invWarningThreshold));
                 
                 if (calibratedPressure > ConfigInfo.instance.maxPressure)
                 {
                     if (Maths.Occurred((calibratedPressure - ConfigInfo.instance.maxPressure) * 0.007d))
                     {
-                        FlightLogger.fetch.LogEvent(part.partInfo.title + " " + ConfigInfo.explodeLogOP + " " + Math.Round(trueGaugePressure - ConfigInfo.instance.maxPressure / volumePercentage, 2) + " atm");
+                        FlightLogger.fetch.LogEvent(part.partInfo.title + " " + ConfigInfo.explodeLogOP + " " + Math.Round(netPressure - ConfigInfo.instance.maxPressure / volumePercentage, 2) + " atm");
                         part.explode();
                     }
                 }
