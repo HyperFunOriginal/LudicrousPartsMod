@@ -12,11 +12,16 @@ namespace LudicrousFuelSystem
     {
         public double enthalpyOfVap;
         public double boilingPoint;
-        public double amtOfGas;
         public double volatility;
         public string liquidName;
 
-        public double gasPressure => amtOfGas / (res.maxAmount - res.amount + 0.01d * res.maxAmount - amtOfGas) * part.temperature * .00267988744d;
+        [KSPField(advancedTweakable = false, guiName = "#ludiPart_0035", guiActiveEditor = false, guiActive = true, guiActiveUnfocused = false, isPersistant = false, groupDisplayName = "#ludiPart_0038", groupName = "IInfo")]
+        public string liquidDisplayName;
+        [KSPField(advancedTweakable = false, guiUnits = " U", guiActiveEditor = false, guiActive = true, guiActiveUnfocused = false, guiName = "#ludiPart_0037", guiFormat = "F2", isPersistant = false, groupDisplayName = "#ludiPart_0038", groupName = "IInfo")]
+        public double amtOfGas;
+        [KSPField(advancedTweakable = false, guiUnits = " atm", guiActiveEditor = false, guiActive = true, guiActiveUnfocused = false, guiName = "#ludiPart_0036", guiFormat = "F2", isPersistant = false, groupDisplayName = "#ludiPart_0038", groupName = "IInfo")]
+        public double gasPressure;
+        
         double v, w, x;
         double vapPressure => Math.Exp(vaporizationCoeff - (vaporizationCoeff * boilingPoint / part.temperature));
         double vaporizationCoeff
@@ -83,6 +88,7 @@ namespace LudicrousFuelSystem
             amtOfGas = 0d;
             if (node.HasValue("amtOfGas"))
                 amtOfGas = Maths.Clamp(double.Parse(node.GetValue("amtOfGas")), 0, res.maxAmount);
+            liquidDisplayName = res.info.displayName;
             base.OnLoad(node);
         }
         public override void OnSave(ConfigNode node)
@@ -103,8 +109,8 @@ namespace LudicrousFuelSystem
         }
         public override void OnUpdate()
         {
+            gasPressure = amtOfGas / (res.maxAmount - res.amount + 0.01d * res.maxAmount - amtOfGas) * part.temperature * .00267988744d;
             double delta = Maths.Clamp((vapPressure - gasPressure - part.staticPressureAtm * 0.01d) * rateMul * Maths.Clamp(TimeWarp.deltaTime * 0.4d, 0, 0.2), -amtOfGas, Math.Min(res.amount, res.maxAmount - amtOfGas));
-            
             amtOfGas = Maths.Clamp(amtOfGas + delta, 0, res.maxAmount * 1.00999 - res.amount);
             res.amount = Maths.Clamp(res.amount - delta, 0d, res.maxAmount);
             part.temperature -= delta * Math.Max(0, enthalpyOfVap - vapPressure * 5d) / part.thermalMass * res.info.density * 10000d;

@@ -22,7 +22,7 @@ namespace LudicrousFuelSystem
         }
         public static double Clamp(double a, double b, double c)
         {
-            if (a < b) return a;
+            if (a < b) return b;
             if (a > c) return c;
             return a;
         }
