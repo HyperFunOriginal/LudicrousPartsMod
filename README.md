@@ -1,7 +1,7 @@
 # LudicrousParts Mod
 A general parts pack, with additional functionalities and changes to the game.
 
-- KSP forum page: https://forum.kerbalspaceprogram.com/index.php?/topic/209612-my-first-dive-into-modding-with-plugins-ludicrousparts-i-know-very-creative-name/#comment-4170448
+- KSP forum page: https://forum.kerbalspaceprogram.com/index.php?/topic/209612-my-first-dive-into-modding-with-plugins-ludicrousparts-i-know-very-creative-name/
 - SpaceDock Release: https://spacedock.info/mod/3108/LudicrousParts
 
 ![Image2](https://user-images.githubusercontent.com/56345030/188137569-b8da2eb4-2abf-486b-ab25-12ed5e9e2795.png)
