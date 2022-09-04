@@ -72,7 +72,7 @@ namespace LudicrousFuelSystem
                 WarningMessageDisp.SendMessage(ConfigInfo.warningEC, 1d - ec.amount / (ec.maxAmount * ConfigInfo.instance.invWarningThreshold));
 
             double accelerationCost = (vessel.acceleration_immediate - vessel.graviticAcceleration).magnitude * 0.025d;
-            if (!vessel.LandedOrSplashed && TimeWarp.WarpMode == TimeWarp.Modes.HIGH && (TimeWarp.CurrentRate > 1.5d))
+            if (!vessel.LandedOrSplashed && vessel.packed)
                 accelerationCost = 0d;
 
             if (accelerationCost > maxMagneticLevStr * ConfigInfo.instance.warningThreshold)
@@ -92,6 +92,7 @@ namespace LudicrousFuelSystem
                 if (Maths.RNGNormalDist() < (accelerationCost - maxMagneticLevStr) * 0.2d)
                 {
                     FlightLogger.fetch.LogEvent(part.partInfo.title + " " + ConfigInfo.explodeLogAcc);
+                    Debug.Log("Acc Mag: " + accelerationCost * 40d);
                     part.explode();
                 }
             }
