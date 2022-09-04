@@ -72,7 +72,7 @@ namespace LudicrousFuelSystem
                 WarningMessageDisp.SendMessage(ConfigInfo.warningEC, 1d - ec.amount / (ec.maxAmount * ConfigInfo.instance.invWarningThreshold));
 
             double accelerationCost = (vessel.acceleration_immediate - vessel.graviticAcceleration).magnitude * 0.025d;
-            if (!vessel.LandedOrSplashed && vessel.packed)
+            if (!vessel.LandedOrSplashed && (vessel.acceleration_immediate == Vector3d.zero || vessel.packed))
                 accelerationCost = 0d;
 
             if (accelerationCost > maxMagneticLevStr * ConfigInfo.instance.warningThreshold)
