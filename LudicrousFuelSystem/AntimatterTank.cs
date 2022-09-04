@@ -92,7 +92,6 @@ namespace LudicrousFuelSystem
                 if (Maths.RNGNormalDist() < (accelerationCost - maxMagneticLevStr) * 0.2d)
                 {
                     FlightLogger.fetch.LogEvent(part.partInfo.title + " " + ConfigInfo.explodeLogAcc);
-                    Debug.Log("Acc Mag: " + accelerationCost * 40d);
                     part.explode();
                 }
             }
