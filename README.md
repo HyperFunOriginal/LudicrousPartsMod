@@ -1,6 +1,7 @@
 # LudicrousParts Mod
 A general parts pack, with additional functionalities and changes to the game.
 
+- Requires ModuleManager
 - KSP forum page: https://forum.kerbalspaceprogram.com/index.php?/topic/209612-my-first-dive-into-modding-with-plugins-ludicrousparts-i-know-very-creative-name/
 - SpaceDock Release: https://spacedock.info/mod/3108/LudicrousParts
 
