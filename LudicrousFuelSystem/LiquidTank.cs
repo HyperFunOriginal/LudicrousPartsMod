@@ -110,11 +110,12 @@ namespace LudicrousFuelSystem
         }
         public override void OnUpdate()
         {
+            double enthalpy = Math.Max(0, enthalpyOfVap - vapPressure * 5d);
             gasPressure = amtOfGas / (res.maxAmount - res.amount + 0.01d * res.maxAmount - amtOfGas) * part.temperature * .00267988744d;
-            double delta = Maths.Clamp((vapPressure - gasPressure - part.staticPressureAtm * 0.01d) * rateMul * Maths.Clamp(TimeWarp.deltaTime * 0.36d, 0, 0.2), -amtOfGas, Math.Min(res.amount, res.maxAmount - amtOfGas));
+            double delta = Maths.Clamp((vapPressure - gasPressure - part.staticPressureAtm * 0.01d) * rateMul * Maths.Clamp(TimeWarp.deltaTime * 0.36d, 0, 50d / Math.Max(150d, enthalpy)), -amtOfGas, Math.Min(res.amount, res.maxAmount - amtOfGas));
             amtOfGas = Maths.Clamp(amtOfGas + delta, 0, res.maxAmount * 1.00999 - res.amount);
             res.amount = Maths.Clamp(res.amount - delta, 0d, res.maxAmount);
-            part.temperature -= delta * Math.Max(0, enthalpyOfVap - vapPressure * 5d) / part.thermalMass * res.info.density * 10000d;
+            part.temperature -= delta * enthalpy / part.thermalMass * res.info.density * 10000d;
             netPressure = gasPressure - part.staticPressureAtm;
             double calibratedPressure = netPressure * volumePercentage;
 
