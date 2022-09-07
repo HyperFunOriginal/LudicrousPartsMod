@@ -68,6 +68,7 @@ namespace LudicrousFuelSystem
         void Awake()
         {
             instance = this;
+            DontDestroyOnLoad(this);
             baseConfigs = GameDatabase.Instance.GetConfigs("Ludicrous_config");
             if (baseConfigs.Length == 0)
             {
