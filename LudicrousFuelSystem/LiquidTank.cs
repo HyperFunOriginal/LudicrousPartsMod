@@ -142,6 +142,7 @@ namespace LudicrousFuelSystem
                     if (Maths.Occurred((calibratedPressure - ConfigInfo.instance.maxPressure) * 0.007d))
                     {
                         FlightLogger.fetch.LogEvent(part.partInfo.title + " " + ConfigInfo.explodeLogOP + " " + Math.Round(netPressure - ConfigInfo.instance.maxPressure / volumePercentage, 2) + " atm");
+                        ShrapnelGeneration.SpawnShrapnel(part, 30, (float)(calibratedPressure * (res.amount + amtOfGas) * res.info.density) * 1.5f);
                         part.explode();
                     }
                 }

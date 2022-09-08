@@ -7,10 +7,30 @@ using UnityEngine;
 using KSP;
 using System.IO;
 using System.Reflection;
+using static UnityEngine.Random;
 using static KSP.Localization.Localizer;
 
 namespace LudicrousFuelSystem
 {
+    public static class Maths
+    {
+        public static double RNGNormalDist()
+        {
+            double rng = Range(0f, 1f);
+            return rng / (1d - rng * rng);
+        }
+        public static bool Occurred(double commonness)
+        {
+            return RNGNormalDist() < commonness;
+        }
+        public static double Clamp(double a, double b, double c)
+        {
+            if (a < b) return b;
+            if (a > c) return c;
+            return a;
+        }
+    }
+
     [KSPAddon(KSPAddon.Startup.Instantly, true)]
     public class ConfigInfo : MonoBehaviour
     {
@@ -38,6 +58,7 @@ namespace LudicrousFuelSystem
         public static string antimatterTankName;
         public static string liquidContainerName;
         public static string liquidContainerPurpose;
+        public static string shrapnelName;
 
         private void WriteConfigIfNoneExists()
         {
@@ -104,6 +125,7 @@ namespace LudicrousFuelSystem
             warningAcc = GetStringByTag("#ludiPart_0032");
             warningOP = GetStringByTag("#ludiPart_0033");
             warningUP = GetStringByTag("#ludiPart_0034");
+            shrapnelName = GetStringByTag("#ludiPart_0042");
         }
     }
 }
