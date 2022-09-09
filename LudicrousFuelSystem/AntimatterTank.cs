@@ -68,7 +68,8 @@ namespace LudicrousFuelSystem
                 if (Range(0f, 1f) < 0.1f)
                 {
                     FlightLogger.fetch.LogEvent(part.partInfo.title + " " + ConfigInfo.explodeLogEC);
-                    ShrapnelGeneration.SpawnShrapnel(part, 40, (float)ah.amount * 1.5f);
+                    double explosionMag = ah.amount * ConfigInfo.instance.antimatterExplViolence;
+                    ShrapnelGeneration.SpawnShrapnel(part, (int)(explosionMag * 0.1d), (float)explosionMag);
                     part.explode();
                 }
             }
@@ -77,7 +78,8 @@ namespace LudicrousFuelSystem
                 if (Maths.RNGNormalDist() < (accelerationCost - maxMagneticLevStr) * 0.2d)
                 {
                     FlightLogger.fetch.LogEvent(part.partInfo.title + " " + ConfigInfo.explodeLogAcc);
-                    ShrapnelGeneration.SpawnShrapnel(part, 40, (float)ah.amount * 1.5f);
+                    double explosionMag = ah.amount * ConfigInfo.instance.antimatterExplViolence;
+                    ShrapnelGeneration.SpawnShrapnel(part, (int)(explosionMag * 0.1d), (float)explosionMag);
                     part.explode();
                 }
             }

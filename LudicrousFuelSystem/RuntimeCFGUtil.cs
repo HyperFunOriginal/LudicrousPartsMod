@@ -42,6 +42,11 @@ namespace LudicrousFuelSystem
         public float maxVacuum = 25f;
         [Persistent]
         public float warningThreshold = .75f;
+        [Persistent]
+        public float tankExplosionViolence = .25f;
+        [Persistent]
+        public float antimatterExplViolence = 4.5f;
+
         public float invWarningThreshold => 1f - warningThreshold;
 
         public static ConfigInfo instance;
@@ -59,6 +64,8 @@ namespace LudicrousFuelSystem
         public static string liquidContainerName;
         public static string liquidContainerPurpose;
         public static string shrapnelName;
+        public static string grenadeName;
+        public static string grenadePurpose;
 
         private void WriteConfigIfNoneExists()
         {
@@ -78,6 +85,8 @@ namespace LudicrousFuelSystem
                     configFile.WriteLine("	maxPressure = 40.0 // Maximum pressure tolerance of parts that contain liquids in atms.");
                     configFile.WriteLine("	maxVacuum = 25.0 // Maximum vacuum tolerance of parts that contain liquids in atms.");
                     configFile.WriteLine("	warningThreshold = 0.75 // Warning threshold in terms of percentage till maximal tolerable value.");
+                    configFile.WriteLine("	tankExplosionViolence = 0.25 // Energy of debris shot out by tank explosions.");
+                    configFile.WriteLine("	antimatterExplViolence = 4.5 // Energy of debris shot out by antimatter explosions.");
                     configFile.WriteLine("}");
                     configFile.Flush();
                     configFile.Close();
@@ -106,7 +115,8 @@ namespace LudicrousFuelSystem
                 Debug.Log("maxPressure: " + maxPressure);
                 Debug.Log("maxVacuum: " + maxVacuum);
                 warningThreshold = Mathf.Clamp01(warningThreshold);
-                Debug.Log("warningThreshold: " + warningThreshold);
+                Debug.Log("tankExplosionViolence: " + tankExplosionViolence);
+                Debug.Log("antimatterExplViolence: " + antimatterExplViolence);
             }
             catch
             {
@@ -126,6 +136,8 @@ namespace LudicrousFuelSystem
             warningOP = GetStringByTag("#ludiPart_0033");
             warningUP = GetStringByTag("#ludiPart_0034");
             shrapnelName = GetStringByTag("#ludiPart_0042");
+            grenadeName = GetStringByTag("#ludiPart_0043");
+            grenadePurpose = GetStringByTag("#ludiPart_0044");
         }
     }
 }
