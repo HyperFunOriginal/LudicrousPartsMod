@@ -46,6 +46,8 @@ namespace LudicrousFuelSystem
         public float tankExplosionViolence = .25f;
         [Persistent]
         public float antimatterExplViolence = 4.5f;
+        [Persistent]
+        public float boilingAudioVolume = 1f;
 
         public float invWarningThreshold => 1f - warningThreshold;
 
@@ -64,8 +66,6 @@ namespace LudicrousFuelSystem
         public static string liquidContainerName;
         public static string liquidContainerPurpose;
         public static string shrapnelName;
-        public static string grenadeName;
-        public static string grenadePurpose;
 
         private void WriteConfigIfNoneExists()
         {
@@ -87,6 +87,7 @@ namespace LudicrousFuelSystem
                     configFile.WriteLine("	warningThreshold = 0.75 // Warning threshold in terms of percentage till maximal tolerable value.");
                     configFile.WriteLine("	tankExplosionViolence = 0.25 // Energy of debris shot out by tank explosions.");
                     configFile.WriteLine("	antimatterExplViolence = 4.5 // Energy of debris shot out by antimatter explosions.");
+                    configFile.WriteLine("	boilingAudioVolume = 1.0 // Volume of boiling sound effect.");
                     configFile.WriteLine("}");
                     configFile.Flush();
                     configFile.Close();
@@ -95,6 +96,7 @@ namespace LudicrousFuelSystem
         }
 
         public UrlDir.UrlConfig[] baseConfigs;
+
         void Awake()
         {
             instance = this;
@@ -117,6 +119,7 @@ namespace LudicrousFuelSystem
                 warningThreshold = Mathf.Clamp01(warningThreshold);
                 Debug.Log("tankExplosionViolence: " + tankExplosionViolence);
                 Debug.Log("antimatterExplViolence: " + antimatterExplViolence);
+                Debug.Log("boilingAudioVolume: " + boilingAudioVolume);
             }
             catch
             {
@@ -136,8 +139,6 @@ namespace LudicrousFuelSystem
             warningOP = GetStringByTag("#ludiPart_0033");
             warningUP = GetStringByTag("#ludiPart_0034");
             shrapnelName = GetStringByTag("#ludiPart_0042");
-            grenadeName = GetStringByTag("#ludiPart_0043");
-            grenadePurpose = GetStringByTag("#ludiPart_0044");
         }
     }
 }

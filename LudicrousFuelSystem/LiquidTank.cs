@@ -15,6 +15,17 @@ namespace LudicrousFuelSystem
         public double volatility;
         public string liquidName;
         public double gasPressure;
+        public Vector3d acceleration
+        {
+            get
+            {
+                Vector3d accelerationCost = vessel.acceleration_immediate - vessel.graviticAcceleration;
+                if (!vessel.LandedOrSplashed && (vessel.acceleration_immediate == Vector3d.zero || vessel.packed))
+                    accelerationCost = Vector3d.zero;
+                return accelerationCost;
+            }
+        }
+        AudioSource boilSound;
 
         [KSPField(advancedTweakable = false, guiName = "#ludiPart_0035", guiActiveEditor = false, guiActive = true, guiActiveUnfocused = false, isPersistant = false, groupDisplayName = "#ludiPart_0038", groupName = "IInfo")]
         public string liquidDisplayName;
@@ -77,6 +88,14 @@ namespace LudicrousFuelSystem
         }
         public override void OnLoad(ConfigNode node)
         {
+            if (boilSound == null)
+                boilSound = gameObject.AddComponent<AudioSource>();
+            boilSound.clip = AudioClipManagers.boilingClip;
+            boilSound.maxDistance = 35f;
+            boilSound.minDistance = 1f;
+            boilSound.ignoreListenerVolume = false;
+            boilSound.mute = true;
+
             if (node.HasValue("liquidName"))
                 liquidName = node.GetValue("liquidName");
             if (node.HasValue("spEnthalpyOfVap"))
@@ -108,17 +127,47 @@ namespace LudicrousFuelSystem
                 node.AddValue("liquidName", liquidName);
             base.OnLoad(node);
         }
+
+        void AudioCheck(double boilRate)
+        {
+            boilRate = Maths.Clamp(boilRate, -amtOfGas, res.amount);
+            if (boilSound.clip == null)
+            {
+                boilSound.clip = AudioClipManagers.boilingClip;
+                return;
+            }
+            boilSound.volume = Mathf.Clamp01((float)boilRate * 0.011f * res.info.volume * ConfigInfo.instance.boilingAudioVolume);
+            boilSound.pitch = (float)Math.Pow(Math.Abs(boilRate) / res.maxAmount * 3d + .15d, 0.14d);
+            bool audible = boilSound.volume > 0.015f && !PauseMenu.isOpen;
+            if (audible && !boilSound.isPlaying)
+                boilSound.Play();
+            boilSound.mute = !audible;
+        }
         public override void OnUpdate()
         {
+            if (HighLogic.LoadedScene != GameScenes.FLIGHT)
+                return;
+
             double enthalpy = Math.Max(0, enthalpyOfVap - vapPressure * 5d);
             gasPressure = amtOfGas / (res.maxAmount - res.amount + 0.01d * res.maxAmount - amtOfGas) * part.temperature * .00267988744d;
-            double delta = Maths.Clamp((vapPressure - gasPressure - part.staticPressureAtm * 0.01d) * rateMul * Maths.Clamp(TimeWarp.deltaTime * 0.36d, 0, 50d / Math.Max(150d, enthalpy)), -amtOfGas, Math.Min(res.amount, res.maxAmount - amtOfGas));
+            double trueRate = (vapPressure - gasPressure - part.staticPressureAtm * 0.01d) * rateMul;
+            double delta = Maths.Clamp(trueRate * Maths.Clamp(TimeWarp.deltaTime * 0.36d, 0, 50d / Math.Max(150d, enthalpy)), -amtOfGas, Math.Min(res.amount, res.maxAmount - amtOfGas));
+
+            AudioCheck(trueRate);
+
+            if (PauseMenu.isOpen)
+                return;
+
             amtOfGas = Maths.Clamp(amtOfGas + delta, 0, res.maxAmount * 1.00999 - res.amount);
             res.amount = Maths.Clamp(res.amount - delta, 0d, res.maxAmount);
             part.temperature -= delta * enthalpy / part.thermalMass * res.info.density * 10000d;
             netPressure = gasPressure - part.staticPressureAtm;
             double calibratedPressure = netPressure * volumePercentage;
+            CheckForFailure(calibratedPressure);
+        }
 
+        private void CheckForFailure(double calibratedPressure)
+        {
             if (-calibratedPressure > ConfigInfo.instance.maxVacuum * ConfigInfo.instance.warningThreshold)
             {
                 WarningMessageDisp.SendMessage(ConfigInfo.warningUP + " " + Math.Round(netPressure, 2) + " atm", (-calibratedPressure - ConfigInfo.instance.maxVacuum * ConfigInfo.instance.warningThreshold) / (ConfigInfo.instance.maxVacuum * ConfigInfo.instance.invWarningThreshold));
@@ -136,7 +185,7 @@ namespace LudicrousFuelSystem
             else if (calibratedPressure > ConfigInfo.instance.maxPressure * ConfigInfo.instance.warningThreshold)
             {
                 WarningMessageDisp.SendMessage(ConfigInfo.warningOP + " " + Math.Round(netPressure, 2) + " atm", (calibratedPressure - ConfigInfo.instance.maxPressure * ConfigInfo.instance.warningThreshold) / (ConfigInfo.instance.maxPressure * ConfigInfo.instance.invWarningThreshold));
-                
+
                 if (calibratedPressure > ConfigInfo.instance.maxPressure)
                 {
                     if (Maths.Occurred((calibratedPressure - ConfigInfo.instance.maxPressure) * 0.007d))
