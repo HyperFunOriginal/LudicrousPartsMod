@@ -38,6 +38,12 @@ namespace LudicrousFuelSystem
             Vector3d vel = rb.velocity + Krakensbane.GetFrameVelocity();
             float alt = FlightGlobals.getAltitudeAtPos(transform.position);
             rb.AddForce(-vel.magnitude * vel * drag * 0.002f * FlightGlobals.getAtmDensity(FlightGlobals.getStaticPressure(alt), FlightGlobals.getExternalTemperature(alt)), ForceMode.Force);
+            if (alt < 0)
+            {
+                float oceanDensity = (float)FlightGlobals.currentMainBody.oceanDensity;
+                rb.AddForce(-vel.magnitude * vel * drag * oceanDensity * 4f, ForceMode.Force);
+                rb.AddForce(Vector3.up * transform.lossyScale.x * transform.lossyScale.y * transform.lossyScale.z * oceanDensity, ForceMode.Force);
+            }
         }
         void FixedUpdate()
         {

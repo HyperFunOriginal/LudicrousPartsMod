@@ -15,6 +15,7 @@ namespace LudicrousFuelSystem
         public double volatility;
         public string liquidName;
         public double gasPressure;
+        public bool loaded;
         public Vector3d acceleration
         {
             get
@@ -95,6 +96,7 @@ namespace LudicrousFuelSystem
             boilSound.minDistance = 1f;
             boilSound.ignoreListenerVolume = false;
             boilSound.mute = true;
+            loaded = false;
 
             if (node.HasValue("liquidName"))
                 liquidName = node.GetValue("liquidName");
@@ -107,6 +109,9 @@ namespace LudicrousFuelSystem
             amtOfGas = 0d;
             if (node.HasValue("amtOfGas"))
                 amtOfGas = Maths.Clamp(double.Parse(node.GetValue("amtOfGas")), 0, res.maxAmount);
+            if (node.HasValue("loaded"))
+                loaded = bool.Parse(node.GetValue("loaded"));
+
             liquidDisplayName = res.info.displayName;
             part.maxPressure = Math.Min(part.maxPressure, Math.Round(ConfigInfo.instance.maxPressure * 101.325d / volumePercentage));
             base.OnLoad(node);
@@ -125,6 +130,8 @@ namespace LudicrousFuelSystem
                 node.AddValue("volatility", volatility);
             if (!node.HasValue("liquidName"))
                 node.AddValue("liquidName", liquidName);
+            if (!node.HasValue("loaded"))
+                node.AddValue("loaded", loaded);
             base.OnLoad(node);
         }
 
@@ -148,6 +155,9 @@ namespace LudicrousFuelSystem
             if (HighLogic.LoadedScene != GameScenes.FLIGHT)
                 return;
 
+            if (!loaded)
+                part.temperature = Math.Min(part.temperature, boilingPoint);
+
             double enthalpy = Math.Max(0, enthalpyOfVap - vapPressure * 5d);
             gasPressure = amtOfGas / (res.maxAmount - res.amount + 0.01d * res.maxAmount - amtOfGas) * part.temperature * .00267988744d;
             double trueRate = (vapPressure - gasPressure - part.staticPressureAtm * 0.01d) * rateMul;
@@ -158,12 +168,14 @@ namespace LudicrousFuelSystem
             if (PauseMenu.isOpen)
                 return;
 
+            loaded = true;
             amtOfGas = Maths.Clamp(amtOfGas + delta, 0, res.maxAmount * 1.00999 - res.amount);
             res.amount = Maths.Clamp(res.amount - delta, 0d, res.maxAmount);
             part.temperature -= delta * enthalpy / part.thermalMass * res.info.density * 10000d;
             netPressure = gasPressure - part.staticPressureAtm;
             double calibratedPressure = netPressure * volumePercentage;
-            CheckForFailure(calibratedPressure);
+            if (!CheatOptions.NoCrashDamage)
+                CheckForFailure(calibratedPressure);
         }
 
         private void CheckForFailure(double calibratedPressure)

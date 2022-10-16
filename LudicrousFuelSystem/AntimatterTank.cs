@@ -48,7 +48,7 @@ namespace LudicrousFuelSystem
 
         public override void OnUpdate()
         {
-            if (HighLogic.LoadedScene != GameScenes.FLIGHT || PauseMenu.isOpen)
+            if (HighLogic.LoadedScene != GameScenes.FLIGHT || PauseMenu.isOpen || CheatOptions.NoCrashDamage)
                 return;
 
             part.explosionPotential = (float)(ah.amount * .2d + .1d);
