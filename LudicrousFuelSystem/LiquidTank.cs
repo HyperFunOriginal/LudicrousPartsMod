@@ -138,6 +138,16 @@ namespace LudicrousFuelSystem
         void AudioCheck(double boilRate)
         {
             boilRate = Maths.Clamp(boilRate, -amtOfGas, res.amount);
+            if (boilSound == null)
+            {
+                boilSound = gameObject.AddComponent<AudioSource>();
+                boilSound.clip = AudioClipManagers.boilingClip;
+                boilSound.maxDistance = 35f;
+                boilSound.minDistance = 1f;
+                boilSound.ignoreListenerVolume = false;
+                boilSound.mute = true;
+                return;
+            }
             if (boilSound.clip == null)
             {
                 boilSound.clip = AudioClipManagers.boilingClip;
