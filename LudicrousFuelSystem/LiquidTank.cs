@@ -162,6 +162,9 @@ namespace LudicrousFuelSystem
         }
         public override void OnUpdate()
         {
+            if (HighLogic.LoadedScene == GameScenes.EDITOR)
+                loaded = false;
+
             if (HighLogic.LoadedScene != GameScenes.FLIGHT)
                 return;
 
