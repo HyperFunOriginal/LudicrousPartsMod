@@ -89,6 +89,8 @@ namespace LudicrousFuelSystem
         }
         public override void OnLoad(ConfigNode node)
         {
+            base.OnLoad(node);
+
             if (boilSound == null)
                 boilSound = gameObject.AddComponent<AudioSource>();
             boilSound.clip = AudioClipManagers.boilingClip;
@@ -114,7 +116,6 @@ namespace LudicrousFuelSystem
 
             liquidDisplayName = res.info.displayName;
             part.maxPressure = Math.Min(part.maxPressure, Math.Round(ConfigInfo.instance.maxPressure * 101.325d / volumePercentage));
-            base.OnLoad(node);
         }
         public override void OnSave(ConfigNode node)
         {
@@ -129,10 +130,10 @@ namespace LudicrousFuelSystem
             if (!node.HasValue("volatility"))
                 node.AddValue("volatility", volatility);
             if (!node.HasValue("liquidName"))
-                node.AddValue("liquidName", liquidName);
+                node.AddValue("liquidName", res.resourceName);
             if (!node.HasValue("loaded"))
                 node.AddValue("loaded", loaded);
-            base.OnLoad(node);
+            base.OnSave(node);
         }
 
         void AudioCheck(double boilRate)

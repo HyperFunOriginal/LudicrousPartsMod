@@ -43,7 +43,7 @@ namespace LudicrousFuelSystem
                 node.AddValue("storageEfficiency", storageEfficiency);
             if (!node.HasValue("maxMagneticLevStr"))
                 node.AddValue("maxMagneticLevStr", maxMagneticLevStr);
-            base.OnLoad(node);
+            base.OnSave(node);
         }
 
         public override void OnUpdate()
